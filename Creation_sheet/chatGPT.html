@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tier List Maker</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  .tier {
+    width: 90%;
+    margin: 10px;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  .tier-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .tier-name {
+    font-weight: bold;
+  }
+  .tier-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 10px;
+  }
+  img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+  }
+  .image-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 10px;
+  }
+  .button {
+    margin: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  input[type="text"] {
+    padding: 5px;
+    margin-right: 10px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <button class="button" onclick="addTier()">Add Tier</button>
+  <button class="button" onclick="resetTiers()">Reset Tiers</button>
+  <button class="button" onclick="saveTierList()">Save Tier List</button>
+  <div id="tiers"></div>
+  <div class="image-pool" id="imagePool">
+    <!-- Sample images -->
+    <img src="https://via.placeholder.com/150" draggable="true" ondragstart="drag(event)">
+    <img src="https://via.placeholder.com/150/ff0000" draggable="true" ondragstart="drag(event)">
+    <img src="https://via.placeholder.com/150/00ff00" draggable="true" ondragstart="drag(event)">
+    <img src="https://via.placeholder.com/150/0000ff" draggable="true" ondragstart="drag(event)">
+  </div>
+</div>
+
+<script>
+let tierCount = 0;
+
+function addTier() {
+  tierCount++;
+  const tierDiv = document.createElement('div');
+  tierDiv.className = 'tier';
+  tierDiv.id = 'tier' + tierCount;
+  tierDiv.innerHTML = `
+    <div class="tier-header">
+      <input type="text" value="Tier ${tierCount}" onchange="renameTier(this, 'tier${tierCount}')">
+      <button class="button" onclick="deleteTier('tier${tierCount}')">Delete Tier</button>
+    </div>
+    <div class="tier-images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+  `;
+  document.getElementById('tiers').appendChild(tierDiv);
+}
+
+function deleteTier(id) {
+  const tier = document.getElementById(id);
+  tier.parentNode.removeChild(tier);
+}
+
+function renameTier(input, id) {
+  const tierHeader = document.querySelector(`#${id} .tier-name`);
+  if (tierHeader) {
+    tierHeader.textContent = input.value;
+  }
+}
+
+function resetTiers() {
+  const images = document.querySelectorAll('.tier-images img');
+  images.forEach(img => {
+    document.getElementById('imagePool').appendChild(img);
+  });
+}
+
+function allowDrop(ev) {
+  ev.preventDefault();
+}
+
+function drag(ev) {
+  ev.dataTransfer.setData("text", ev.target.id);
+}
+
+function drop(ev) {
+  ev.preventDefault();
+  var data = ev.dataTransfer.getData("text");
+  ev.target.appendChild(document.getElementById(data));
+}
+
+function saveTierList() {
+  html2canvas(document.getElementById('tiers')).then(canvas => {
+    const base64image = canvas.toDataURL("image/png");
+    const link = document.createElement('a');
+    link.download = 'my-tier-list.png';
+    link.href = base64image;
+    link.click();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  addTier(); // Start with one default tier
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</body>
+</html>
