@@ -80,7 +80,7 @@
             <div class="tier-header">A Tier</div>
             <div class="tier-items" id="tierItemsA" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
-        <!-- ... other tiers ... -->
+        <!--... other tiers... -->
         <div class="tier" id="tierF">
             <div class="tier-header">F Tier</div>
             <div class="tier-items" id="tierItemsF" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
@@ -148,31 +148,36 @@
             while (imagePool.firstChild) {
                 imagePool.removeChild(imagePool.firstChild);
             }
+            document.getElementById('imageInput').value = '';
         }
 
         // Function to save tier list
         function saveTierList() {
             const tiers = document.getElementsByClassName('tier');
-            const tierList = [];
+            const list = [];
             for (let i = 0; i < tiers.length; i++) {
                 const tier = tiers[i];
-                const tierHeader = tier.getElementsByClassName('tier-header')[0].innerText;
+                const tierName = tier.getElementsByClassName('tier-header')[0].textContent.trim();
+                const tierImages = [];
                 const tierItems = tier.getElementsByClassName('tier-items')[0];
-                const tierImages = tierItems.getElementsByTagName('img');
-                const tierData = {
-                    tier: tierHeader,
-                    images: []
-                };
-                for (let j = 0; j < tierImages.length; j++) {
-                    const img = tierImages[j];
-                    tierData.images.push(img.src);
+                for (let j = 0; j < tierItems.children.length; j++) {
+                    const img = tierItems.children[j];
+                    tierImages.push({
+                        src: img.src,
+                        alt: img.alt,
+                    });
                 }
-                tierList.push(tierData);
+                list.push({
+                    name: tierName,
+                    images: tierImages,
+                });
             }
-            const data = JSON.stringify(tierList);
+            const json = JSON.stringify(list, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data);
-            a.download = 'tierList.json';
+            a.href = url;
+            a.download = 'tier-list.json';
             a.click();
         }
     </script>
