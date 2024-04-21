@@ -1,142 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tier List Maker</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-  }
-  .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
-  }
-  .tier {
-    width: 90%;
-    margin: 10px;
-    background-color: #f0f0f0;
-    padding: 10px;
-    border-radius: 8px;
-  }
-  .tier-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .tier-name {
-    font-weight: bold;
-  }
-  .tier-images {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding-top: 10px;
-  }
-  img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-  }
-  .image-pool {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding-top: 10px;
-  }
-  .button {
-    margin: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  input[type="text"] {
-    padding: 5px;
-    margin-right: 10px;
-  }
-</style>
+    <meta charset="UTF-8">
+    <title>Tier List Maker</title>
+    <style>
+        body,
+        html {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .tier-list,
+        .upload-area {
+            width: 80%;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            padding: 10px;
+        }
+
+        .tier {
+            background: #f1f1f1;
+            padding: 10px;
+            margin-bottom: 5px;
+        }
+
+        .tier h2 {
+            font-size: 18px;
+            margin: 5px 0;
+        }
+
+        .images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .image {
+            width: 100px;
+            height: 100px;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid black;
+        }
+
+        .button {
+            margin: 10px;
+            padding: 5px 20px;
+            cursor: pointer;
+        }
+
+        .input,
+        .button {
+            font-size: 16px;
+        }
+    </style>
 </head>
+
 <body>
-<div class="container">
-  <button class="button" onclick="addTier()">Add Tier</button>
-  <button class="button" onclick="resetTiers()">Reset Tiers</button>
-  <button class="button" onclick="saveTierList()">Save Tier List</button>
-  <div id="tiers"></div>
-  <div class="image-pool" id="imagePool">
-    <!-- Sample images -->
-    <img src="https://via.placeholder.com/150" draggable="true" ondragstart="drag(event)">
-    <img src="https://via.placeholder.com/150/ff0000" draggable="true" ondragstart="drag(event)">
-    <img src="https://via.placeholder.com/150/00ff00" draggable="true" ondragstart="drag(event)">
-    <img src="https://via.placeholder.com/150/0000ff" draggable="true" ondragstart="drag(event)">
-  </div>
-</div>
-
-<script>
-let tierCount = 0;
-
-function addTier() {
-  tierCount++;
-  const tierDiv = document.createElement('div');
-  tierDiv.className = 'tier';
-  tierDiv.id = 'tier' + tierCount;
-  tierDiv.innerHTML = `
-    <div class="tier-header">
-      <input type="text" value="Tier ${tierCount}" onchange="renameTier(this, 'tier${tierCount}')">
-      <button class="button" onclick="deleteTier('tier${tierCount}')">Delete Tier</button>
+    <div class="container">
+        <button class="button" onclick="resetList()">Reset</button>
+        <button class="button" onclick="addTier()">Add Tier</button>
+        <button class="button" onclick="saveTierList()">Save Tier List</button>
+        <input type="file" multiple class="input" oninput="uploadImages(event)">
+        <div class="upload-area" id="uploadArea" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
+            Drop Images Here
+        </div>
+        <div class="tier-list" id="tierList">
+            <div class="tier" data-tier="S">
+                <h2 contenteditable="true">S</h2>
+                <div class="images"></div>
+            </div>
+            <div class="tier" data-tier="A">
+                <h2 contenteditable="true">A</h2>
+                <div class="images"></div>
+            </div>
+            <div class="tier" data-tier="B">
+                <h2 contenteditable="true">B</h2>
+                <div class="images"></div>
+            </div>
+            <div class="tier" data-tier="C">
+                <h2 contenteditable="true">C</h2>
+                <div the="images"></div>
+            </div>
+            <div class="tier" data-tier="D">
+                <h2 contenteditable="true">D</h2>
+                <div class="images"></div>
+            </div>
+            <div class="tier" data-tier="F">
+                <h2 contenteditable="true">F</h2>
+                <div class="images"></div>
+            </div>
+        </div>
     </div>
-    <div class="tier-images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-  `;
-  document.getElementById('tiers').appendChild(tierDiv);
-}
+    <script>
+        function dragOverHandler(ev) {
+            ev.preventDefault();
+        }
 
-function deleteTier(id) {
-  const tier = document.getElementById(id);
-  tier.parentNode.removeChild(tier);
-}
+        function dropHandler(ev) {
+            ev.preventDefault();
+            if (ev.dataTransfer.items) {
+                for (let i = 0; i < ev.dataTransfer.items.length; i++) {
+                    if (ev.dataTransfer.items[i].kind === 'file') {
+                        let file = ev.dataTransfer.items[i].getAsFile();
+                        loadImage(file);
+                    }
+                }
+            }
+        }
 
-function renameTier(input, id) {
-  const tierHeader = document.querySelector(`#${id} .tier-name`);
-  if (tierHeader) {
-    tierHeader.textContent = input.value;
-  }
-}
+        function uploadImages(event) {
+            for (let file of event.target.files) {
+                loadImage(file);
+            }
+        }
 
-function resetTiers() {
-  const images = document.querySelectorAll('.tier-images img');
-  images.forEach(img => {
-    document.getElementById('imagePool').appendChild(img);
-  });
-}
+        function loadImage(file) {
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                let imgDiv = document.createElement('div');
+                imgDiv.classList.add('image');
+                imgDiv.style.backgroundImage = `url(${e.target.result})`;
+                imgDiv.draggable = true;
+                imgDiv.ondragstart = dragStart;
+                document.getElementById('uploadArea').appendChild(imgDiv);
+            };
+            reader.readAsDataURL(file);
+        }
 
-function allowDrop(ev) {
-  ev.preventDefault();
-}
+        function dragStart(event) {
+            event.dataTransfer.setData("text", event.target.style.backgroundImage.slice(5, -2));
+        }
 
-function drag(ev) {
-  ev.dataTransfer.setData("text", ev.target.id);
-}
+        function resetList() {
+            const images = document.querySelectorAll('.tier .image');
+            images.forEach(img => document.getElementById('uploadArea').appendChild(img));
+        }
 
-function drop(ev) {
-  ev.preventDefault();
-  var data = ev.dataTransfer.getData("text");
-  ev.target.appendChild(document.getElementById(data));
-}
+        function addTier() {
+            let tierName = prompt("Enter tier name:");
+            if (!tierName) return;
+            const tierList = document.getElementById('tierList');
+            const tierDiv = document.createElement('div');
+            tierDiv.classList.add('tier');
+            tierDiv.innerHTML = `<h2 contenteditable="true">${tierName}</h2><div class="images"></div>`;
+            tierList.appendChild(tierDiv);
+        }
 
-function saveTierList() {
-  html2canvas(document.getElementById('tiers')).then(canvas => {
-    const base64image = canvas.toDataURL("image/png");
-    const link = document.createElement('a');
-    link.download = 'my-tier-list.png';
-    link.href = base64image;
-    link.click();
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  addTier(); // Start with one default tier
-});
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        function saveTierList() {
+            // This function would need to be implemented to capture the tier list as an image
+            alert("Functionality to save the tier list needs to be implemented.");
+        }
+    </script>
 </body>
+
 </html>

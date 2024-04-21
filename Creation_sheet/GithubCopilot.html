@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tier List Maker</title>
+    <style>
+        /* CSS styles for the tier list */
+        .tier-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .tier {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .tier-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .tier-items {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .tier-item {
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            border: 1px solid black;
+            background-color: lightgray;
+            background-size: cover;
+            background-position: center;
+        }
+        .reset-button {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tier List Maker</h1>
+    
+    <div class="tier-list">
+        <button class="reset-button">Reset</button>
+        <div class="tier">
+            <h2 class="tier-title">S</h2>
+            <div class="tier-items"></div>
+        </div>
+        <div class="tier">
+            <h2 class="tier-title">A</h2>
+            <div class="tier-items"></div>
+        </div>
+        <div class="tier">
+            <h2 class="tier-title">B</h2>
+            <div class="tier-items"></div>
+        </div>
+        <div class="tier">
+            <h2 class="tier-title">C</h2>
+            <div class="tier-items"></div>
+        </div>
+        <div class="tier">
+            <h2 class="tier-title">D</h2>
+            <div class="tier-items"></div>
+        </div>
+        <div class="tier">
+            <h2 class="tier-title">F</h2>
+            <div class="tier-items"></div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript code for the tier list functionality
+        const resetButton = document.querySelector('.reset-button');
+        const tierItems = document.querySelectorAll('.tier-items');
+
+        // Add event listeners for drag and drop functionality
+        tierItems.forEach(tier => {
+            tier.addEventListener('dragover', e => {
+                e.preventDefault();
+            });
+            tier.addEventListener('drop', e => {
+                e.preventDefault();
+                const item = document.getElementById(e.dataTransfer.getData('text/plain'));
+                tier.appendChild(item);
+            });
+        });
+
+        // Add event listener for reset button
+        resetButton.addEventListener('click', () => {
+            const tierItemsContainer = document.querySelector('.tier-items');
+            const items = document.querySelectorAll('.tier-item');
+            items.forEach(item => {
+                tierItemsContainer.appendChild(item);
+            });
+        });
+    </script>
+</body>
+</html>

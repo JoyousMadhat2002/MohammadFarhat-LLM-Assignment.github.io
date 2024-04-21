@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #tierList {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .tier {
+            border: 1px solid black;
+            min-height: 50px;
+            width: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .tier h2 {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+        }
+        .tier img {
+            height: 30px;
+            margin-right: 5px;
+        }
+        #images {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        #images img {
+            height: 30px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="tierList">
+        <!-- Tier list will be generated here -->
+    </div>
+    <button onclick="reset()">Reset</button>
+    <input type="file" id="fileUpload" multiple onchange="uploadFiles(event)">
+    <div id="images">
+        <!-- Uploaded images will be displayed here -->
+    </div>
+    <script>
+        var tiers = ['S', 'A', 'B', 'C', 'D', 'F'];
+
+        function reset() {
+            // Reset the tier list
+            var tierDivs = document.querySelectorAll('.tier');
+            tierDivs.forEach(function(div) {
+                while (div.firstChild) {
+                    div.removeChild(div.firstChild);
+                }
+            });
+            var images = document.querySelectorAll('#images img');
+            images.forEach(function(img) {
+                document.getElementById('images').removeChild(img);
+            });
+        }
+
+        function uploadFiles(event) {
+            // Handle file upload
+            var files = event.target.files;
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                var img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.onload = function() {
+                    URL.revokeObjectURL(this.src);
+                }
+                img.draggable = true;
+                img.ondragstart = function(event) {
+                    event.dataTransfer.setData('text/plain', event.target.src);
+                }
+                document.getElementById('images').appendChild(img);
+            }
+        }
+
+        // Generate the initial tier list
+        for (var i = 0; i < tiers.length; i++) {
+            var tier = document.createElement('div');
+            tier.className = 'tier';
+            tier.innerHTML = '<h2>' + tiers[i] + '</h2>';
+            tier.ondragover = function(event) {
+                event.preventDefault();
+            }
+            tier.ondrop = function(event) {
+                var img = document.createElement('img');
+                img.src = event.dataTransfer.getData('text/plain');
+                event.target.appendChild(img);
+            }
+            document.getElementById('tierList').appendChild(tier);
+        }
+    </script>
+</body>
+</html>

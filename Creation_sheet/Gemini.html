@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tier List Maker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .tier-list-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tier-list {
+            display: flex;
+            flex-wrap: wrap;
+            width: 80%;
+            margin-bottom: 20px;
+        }
+
+        .tier {
+            padding: 10px 20px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            background-color: #eee;
+            cursor: pointer;
+        }
+
+        .tier.active {
+            background-color: #ddd;
+        }
+
+        .item {
+            width: 100px;
+            height: 100px;
+            margin: 5px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: grab;
+        }
+
+        .item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-list {
+            display: flex;
+            flex-wrap: wrap;
+            width: 80%;
+            margin-bottom: 20px;
+        }
+
+        .upload-input {
+            display: none;
+        }
+
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button.primary {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .button.secondary {
+            background-color: #eee;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Tier List Maker</h1>
+    <div class="tier-list-container">
+        <div class="button primary" id="reset-button">Reset</div>
+        <div class="tier-list">
+            <div class="tier active" data-tier="S">S</div>
+            <div class="tier" data-tier="A">A</div>
+            <div class="tier" data-tier="B">B</div>
+            <div class="tier" data-tier="C">C</div>
+            <div class="tier" data-tier="D">D</div>
+            <div class="tier" data-tier="F">F</div>
+        </div>
+        <div>
+            <label for="item-upload">Add Items: </label>
+            <input type="file" id="item-upload" multiple accept="image/*">
+            <button class="button secondary" id="add-item-button">Add</button>
+        </div>
+        <div class="item-list"></div>
+    </div>
+
+    <script>
+        const tierList = document.querySelector('.tier-list');
+        const itemList = document.querySelector('.item-list');
+        const resetButton = document.getElementById('reset-button');
+        const itemUpload = document.getElementById('item-upload');
+        const addItemButton = document.getElementById('add-item-button');
+
+        let tiers = ['S', 'A', 'B', 'C', 'D', 'F'];
+        let items = [];
+
+        function createTier(tierName) {
+            const tier = document.createElement('div');
+            tier.classList.add('tier');
+            tier.textContent = tierName;
+            tier.dataset.tier = tierName;
+            tier.addEventListener('click', handleTierClick);
+            return tier;
+        }
+
+        function createItem(imageUrl) {
+            const item = document.createElement('div');
+            item.classList.add('item');
+
+            const image = document.createElement('img');
+            image.src = imageUrl;
+
+            item.appendChild(image);
+
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragover', handleDragOver);
+            item.addEventListener('drop', handleDrop);
+
+            return item;
+        }
+
+        function handleDragStart(event) {
+            event.dataTransfer.setData('text/plain', event.target.dataset.imageUrl);
+        }
+
+        function handleDragOver(event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            }
+        }
+
+        function handleDrop(event) {
+            const tierName = event.target.closest('.tier').dataset.tier;
+            const imageUrl = event.dataTransfer.getData('text/plain');
+            addItemToTier(imageUrl, tierName);
+        }
+
+        function addItemToTier(imageUrl, tierName) {
+            const newItem = createItem(imageUrl);
+            newItem.dataset.imageUrl = imageUrl;
+            const targetTier = tierList.querySelector(`[data-tier="${tierName}"]`);
+            targetTier.appendChild(newItem);
+        }
+
+        function handleTierClick(event) {
+            tierList.querySelectorAll('.tier').forEach(tier => tier.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function resetTierList() {
+            itemList.innerHTML = '';
+            tiers.forEach(tierName => {
+                const tier = tierList.querySelector(`[data-tier="${tierName}"]`);
+                tier.querySelectorAll('.item').forEach(item => itemList.appendChild(item));
+            });
+        }
+
+        function handleAddItem() {
+            itemUpload.click();
+        }
+
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    addItemToTier(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        resetButton.addEventListener('click', resetTierList);
+        addItemButton.addEventListener('click', handleAddItem);
+        itemUpload.addEventListener('change', handleFileUpload);
+
+        // Initializing with default tiers
+        tiers.forEach(tierName => tierList.appendChild(createTier(tierName)));
+    </script>
+</body>
+
+</html>
