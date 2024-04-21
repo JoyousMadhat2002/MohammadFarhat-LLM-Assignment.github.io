@@ -1,80 +1,91 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tier List Maker</title>
     <style>
-        /* CSS styles for the tier list */
         .tier-list {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
         .tier {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
+            border: 1px solid black;
+            margin: 10px;
+            min-height: 100px;
+            width: 200px;
+            position: relative;
         }
         .tier-title {
-            font-weight: bold;
-            margin-bottom: 10px;
+            position: absolute;
+            top: -10px;
+            background: white;
+            padding: 0 5px;
         }
         .tier-items {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
+            padding: 20px;
         }
         .tier-item {
-            width: 100px;
-            height: 100px;
-            margin: 10px;
-            border: 1px solid black;
-            background-color: lightgray;
-            background-size: cover;
-            background-position: center;
+            margin: 5px;
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
         }
-        .reset-button {
-            margin-bottom: 20px;
+        .reset-button, .save-button {
+            margin: 10px;
+        }
+        .item-pool {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            border: 1px solid black;
+            padding: 10px;
+            margin: 10px;
+            width: 220px;
         }
     </style>
 </head>
 <body>
-    <h1>Tier List Maker</h1>
-    
     <div class="tier-list">
         <button class="reset-button">Reset</button>
-        <div class="tier">
-            <h2 class="tier-title">S</h2>
-            <div class="tier-items"></div>
-        </div>
-        <div class="tier">
-            <h2 class="tier-title">A</h2>
-            <div class="tier-items"></div>
-        </div>
-        <div class="tier">
-            <h2 class="tier-title">B</h2>
-            <div class="tier-items"></div>
-        </div>
-        <div class="tier">
-            <h2 class="tier-title">C</h2>
-            <div class="tier-items"></div>
-        </div>
-        <div class="tier">
-            <h2 class="tier-title">D</h2>
-            <div class="tier-items"></div>
-        </div>
-        <div class="tier">
-            <h2 class="tier-title">F</h2>
-            <div class="tier-items"></div>
-        </div>
+        <button class="save-button">Save</button>
+        <!-- Tiers will be dynamically added here -->
+    </div>
+    <div class="item-pool">
+        <!-- Items will be dynamically added here -->
     </div>
 
     <script>
         // JavaScript code for the tier list functionality
+        const tierList = document.querySelector('.tier-list');
+        const itemPool = document.querySelector('.item-pool');
         const resetButton = document.querySelector('.reset-button');
-        const tierItems = document.querySelectorAll('.tier-items');
+        const saveButton = document.querySelector('.save-button');
+        const tiers = ['S', 'A', 'B', 'C', 'D', 'F'];
+
+        // Initialize tiers
+        tiers.forEach(tier => {
+            const tierDiv = document.createElement('div');
+            tierDiv.classList.add('tier');
+            tierDiv.innerHTML = `
+                <h2 class="tier-title">${tier}</h2>
+                <div class="tier-items"></div>
+            `;
+            tierList.appendChild(tierDiv);
+        });
+
+        // Initialize items
+        for (let i = 1; i <= 10; i++) {
+            const item = document.createElement('img');
+            item.classList.add('tier-item');
+            item.src = `https://via.placeholder.com/50?text=${i}`; // Replace with actual image source
+            item.draggable = true;
+            itemPool.appendChild(item);
+        }
 
         // Add event listeners for drag and drop functionality
+        const tierItems = document.querySelectorAll('.tier-items');
         tierItems.forEach(tier => {
             tier.addEventListener('dragover', e => {
                 e.preventDefault();
@@ -88,12 +99,22 @@
 
         // Add event listener for reset button
         resetButton.addEventListener('click', () => {
-            const tierItemsContainer = document.querySelector('.tier-items');
             const items = document.querySelectorAll('.tier-item');
             items.forEach(item => {
-                tierItemsContainer.appendChild(item);
+                itemPool.appendChild(item);
+            });
+        });
+
+        // Add event listener for save button
+        saveButton.addEventListener('click', () => {
+            html2canvas(tierList).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'tier-list.png';
+                link.href = canvas.toDataURL();
+                link.click();
             });
         });
     </script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script> <!-- html2canvas library for saving the tier list as an image -->
 </body>
 </html>
