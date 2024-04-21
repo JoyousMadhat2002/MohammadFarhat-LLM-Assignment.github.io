@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tier List Maker</title>
+    <style>
+        body,
+        html {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .tier-list,
+        .upload-area {
+            width: 80%;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            padding: 10px;
+        }
+
+        .tier {
+            background: #f1f1f1;
+            padding: 10px;
+            margin-bottom: 5px;
+        }
+
+        .tier h2 {
+            font-size: 18px;
+            margin: 5px 0;
+        }
+
+        .images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .image {
+            width: 100px;
+            height: 100px;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid black;
+        }
+
+        .button {
+            margin: 10px;
+            padding: 5px 20px;
+            cursor: pointer;
+        }
+
+        .input,
+        .button {
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <button class="button" onclick="resetList()">Reset</button>
+        <button class="button" onclick="addTier()">Add Tier</button>
+        <button class="button" onclick="saveTierList()">Save Tier List</button>
+        <input type="file" multiple class="input" oninput="uploadImages(event)">
+        <div class="upload-area" id="uploadArea" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
+            Drop Images Here
+        </div>
+        <div class="tier-list" id="tierList">
+            <div class="tier" data-tier="S">
+                <h2 contenteditable="true">S</h2>
+                <div class="images"></div>
+            </div>
+            <div class="tier" data-tier="A">
+                <h2 contenteditable="true">A</h2>
+                <div class="images"></div>
+            </div>
+            <div class="tier" data-tier="B">
+                <h2 contenteditable="true">B</h2>
+                <div class="images"></div>
+            </div>
+            <div class="tier" data-tier="C">
+                <h2 contenteditable="true">C</h2>
+                <div the="images"></div>
+            </div>
+            <div class="tier" data-tier="D">
+                <h2 contenteditable="true">D</h2>
+                <div class="images"></div>
+            </div>
+            <div class="tier" data-tier="F">
+                <h2 contenteditable="true">F</h2>
+                <div class="images"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function dragOverHandler(ev) {
+            ev.preventDefault();
+        }
+
+        function dropHandler(ev) {
+            ev.preventDefault();
+            if (ev.dataTransfer.items) {
+                for (let i = 0; i < ev.dataTransfer.items.length; i++) {
+                    if (ev.dataTransfer.items[i].kind === 'file') {
+                        let file = ev.dataTransfer.items[i].getAsFile();
+                        loadImage(file);
+                    }
+                }
+            }
+        }
+
+        function uploadImages(event) {
+            for (let file of event.target.files) {
+                loadImage(file);
+            }
+        }
+
+        function loadImage(file) {
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                let imgDiv = document.createElement('div');
+                imgDiv.classList.add('image');
+                imgDiv.style.backgroundImage = `url(${e.target.result})`;
+                imgDiv.draggable = true;
+                imgDiv.ondragstart = dragStart;
+                document.getElementById('uploadArea').appendChild(imgDiv);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function dragStart(event) {
+            event.dataTransfer.setData("text", event.target.style.backgroundImage.slice(5, -2));
+        }
+
+        function resetList() {
+            const images = document.querySelectorAll('.tier .image');
+            images.forEach(img => document.getElementById('uploadArea').appendChild(img));
+        }
+
+        function addTier() {
+            let tierName = prompt("Enter tier name:");
+            if (!tierName) return;
+            const tierList = document.getElementById('tierList');
+            const tierDiv = document.createElement('div');
+            tierDiv.classList.add('tier');
+            tierDiv.innerHTML = `<h2 contenteditable="true">${tierName}</h2><div class="images"></div>`;
+            tierList.appendChild(tierDiv);
+        }
+
+        function saveTierList() {
+            // This function would need to be implemented to capture the tier list as an image
+            alert("Functionality to save the tier list needs to be implemented.");
+        }
+    </script>
+</body>
+
+</html>

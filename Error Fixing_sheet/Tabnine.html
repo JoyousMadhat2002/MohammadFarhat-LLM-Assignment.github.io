@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .tier-list {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+
+        .tier {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tier h2 {
+            margin-bottom: 5px;
+        }
+
+        .images {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image {
+            width: 50px;
+            height: 50px;
+            margin: 5px;
+            border: 1px solid black;
+        }
+
+        .buttons {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .button {
+            margin-right: 5px;
+        }
+
+        #image-input {
+            display: none;
+        }
+
+        button[data-tier] {
+            background-color: lightgray;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        button[data-tier]:hover {
+            background-color: gray;
+        }
+
+        button.add {
+            background-color: lightgreen;
+        }
+
+        button.add:hover {
+            background-color: green;
+        }
+
+        button.remove {
+            background-color: lightcoral;
+        }
+
+        button.remove:hover {
+            background-color: coral;
+        }
+
+        button.reset {
+            background-color: lightblue;
+        }
+
+        button.reset:hover {
+            background-color: blue;
+        }
+    </style>
+    <script>
+        const tiers = document.querySelectorAll(".tier");
+        const images = document.querySelectorAll(".image");
+        const buttons = document.querySelectorAll(".button");
+        const addButton = document.querySelector(".add");
+        const removeButton = document.querySelector(".remove");
+        const resetButton = document.querySelector(".reset");
+        const imageInput = document.querySelector("#image-input");
+
+        function addImage(event) {
+            const tier = event.target.dataset.tier;
+            const image = document.createElement("img");
+            image.classList.add("image");
+            imageInput.files.forEach((file) => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    image.src = event.target.result;
+                    images.forEach((img) => {
+                        if (img.src === event.target.result) {
+                            return;
+                        }
+                    });
+                    images.forEach((img) => {
+                        if (img.src === event.target.result) {
+                            return;
+                        } else {
+                            img.style.display = "none";
+                        }
+                    });
+                    image.style.display = "block";
+                    images.push(image);
+                    images = [...new Set(images)];
+                    images.forEach((img) => {
+                        tierImages.push(img);
+                    });
+                    tierImages = [...new Set(tierImages)];
+                    tier.appendChild(image);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeTier(event) {
+            const tier = event.target.dataset.tier;
+            tierImages.forEach((img) => {
+                if (img.parentElement.dataset.name === tier) {
+                    img.remove();
+                }
+            });
+            tierImages = tierImages.filter((img) => {
+                return img.parentElement.dataset.name !== tier;
+            });
+        }
+
+        function resetTierList() {
+            tierImages.forEach((img) => {
+                img.remove();
+            });
+            tierImages = [];
+            tiers.forEach((tier) => {
+                tier.innerHTML = "";
+            });
+        }
+
+        tiers.forEach((tier) => {
+            const tierName = tier.dataset.name;
+            tierImages = [];
+            images.forEach((img) => {
+                if (img.parentElement.dataset.name === tierName) {
+                    tierImages.push(img);
+                }
+            });
+            tierImages = [...new Set(tierImages)];
+            tier.innerHTML = "";
+            tierImages.forEach((img) => {
+                tier.appendChild(img);
+            });
+        });
+
+        addButton.addEventListener("click", addImage);
+        removeButton.addEventListener("click", removeTier);
+        resetButton.addEventListener("click", resetTierList);
+    </script>
+    <title>Tier List Maker</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Tier List Maker</h1>
+        <div class="tier-list">
+            <div class="tier" data-name="S">
+                <h2>S Tier</h2>
+                <div class="images"></div>
+                <div class="buttons">
+                    <button class="add" data-tier="S">Add Image</button>
+                    <button class="remove" data-tier="S">Remove Tier</button>
+                    <button class="reset">Reset</button>
+                </div>
+            </div>
+            <div class="tier" data-name="A">
+                <h2>A Tier</h2>
+                <div class="images"></div>
+                <div class="buttons">
+                    <button class="add" data-tier="A">Add Image</button>
+                    <button class="remove" data-tier="A">Remove Tier</button>
+                    <button class="reset">Reset</button>
+                </div>
+            </div>
+            <div class="tier" data-name="B">
+                <h2>B Tier</h2>
+                <div class="images"></div>
+                <div class="buttons">
+                    <button class="add" data-tier="B">Add Image</button>
+                    <button class="remove" data-tier="B">Remove Tier</button>
+                    <button class="reset">Reset</button>
+                </div>
+            </div>
+            <div class="tier" data-name="C">
+                <h2>C Tier</h2>
+                <div class="images"></div>
+                <div class="buttons">
+                    <button class="add" data-tier="C">Add Image</button>
+                    <button class="remove" data-tier="C">Remove Tier</button>
+                    <button class="reset">Reset</button>
+                </div>
+            </div>
+            <div class="tier" data-name="D">
+                <h2>D Tier</h2>
+                <div class="images"></div>
+                <div class="buttons">
+                    <button class="add" data-tier="D">Add Image</button>
+                    <button class="remove" data-tier="D">Remove Tier</button>
+                    <button class="reset">Reset</button>
+                </div>
+            </div>
+            <div class="tier" data-name="F">
+                <h2>F Tier</h2>
+                <div class="images"></div>
+                <div class="buttons">
+                    <button class="add" data-tier="F">Add Image</button>
+                    <button class="remove" data-tier="F">Remove Tier</button>
+                    <button class="reset">Reset</button>
+                </div>
+            </div>
+        </div>
+        <input type="file" id="image-input" multiple>
+    </div>
+</body>
+
+</html>

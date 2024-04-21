@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tier List Maker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .tier-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tier {
+            border: 1px solid #000;
+            margin: 10px;
+            padding: 10px;
+            min-width: 200px;
+        }
+
+        .tier-header {
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .tier-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .tier-item {
+            border: 1px solid #ddd;
+            padding: 5px;
+            position: relative;
+        }
+
+        .tier-item img {
+            max-width: 100px;
+            max-height: 100px;
+        }
+
+        .remove-item {
+            position: absolute;
+            top: 0;
+            right: 0;
+            cursor: pointer;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+        }
+
+        .reset-button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="controls">
+        <button onclick="resetTierList()">Reset</button>
+        <button onclick="saveTierList()">Save</button>
+    </div>
+
+    <div id="tierList" class="tier-list">
+        <!-- Default tiers -->
+        <div class="tier" id="tierS">
+            <div class="tier-header">S Tier</div>
+            <div class="tier-items" id="tierItemsS" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+        <div class="tier" id="tierA">
+            <div class="tier-header">A Tier</div>
+            <div class="tier-items" id="tierItemsA" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+        <!--... other tiers... -->
+        <div class="tier" id="tierF">
+            <div class="tier-header">F Tier</div>
+            <div class="tier-items" id="tierItemsF" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+    </div>
+
+    <div id="imagePool" class="tier-items" ondragover="allowDrop(event)" ondrop="drop(event)">
+        <!-- Images will be added here -->
+    </div>
+
+    <input type="file" id="imageInput" multiple onchange="loadImages(event)" />
+
+    <script>
+        // Function to load images from input
+        function loadImages(event) {
+            const files = event.target.files;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.draggable = true;
+                        img.ondragstart = function (event) {
+                            event.dataTransfer.setData('text/plain', event.target.id);
+                        };
+                        img.id = 'img-' + Date.now();
+                        document.getElementById('imagePool').appendChild(img);
+                    };
+                    reader.readAsDataUrl(file);
+                }
+            }
+        }
+
+        // Function to allow dropping images
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        // Function to handle dropping images
+        function drop(event) {
+            event.preventDefault();
+            const data = event.dataTransfer.getData('text/plain');
+            const img = document.getElementById(data);
+            if (img) {
+                img.remove();
+                const tierId = event.target.id;
+                const tierItems = document.getElementById(tierId);
+                tierItems.appendChild(img);
+            }
+        }
+
+        // Function to reset tier list
+        function resetTierList() {
+            const tiers = document.getElementsByClassName('tier');
+            for (let i = 0; i < tiers.length; i++) {
+                const tier = tiers[i];
+                const tierItems = tier.getElementsByClassName('tier-items')[0];
+                while (tierItems.firstChild) {
+                    tierItems.removeChild(tierItems.firstChild);
+                }
+            }
+            const imagePool = document.getElementById('imagePool');
+            while (imagePool.firstChild) {
+                imagePool.removeChild(imagePool.firstChild);
+            }
+            document.getElementById('imageInput').value = '';
+        }
+
+        // Function to save tier list
+        function saveTierList() {
+            const tiers = document.getElementsByClassName('tier');
+            const list = [];
+            for (let i = 0; i < tiers.length; i++) {
+                const tier = tiers[i];
+                const tierName = tier.getElementsByClassName('tier-header')[0].textContent.trim();
+                const tierImages = [];
+                const tierItems = tier.getElementsByClassName('tier-items')[0];
+                for (let j = 0; j < tierItems.children.length; j++) {
+                    const img = tierItems.children[j];
+                    tierImages.push({
+                        src: img.src,
+                        alt: img.alt,
+                    });
+                }
+                list.push({
+                    name: tierName,
+                    images: tierImages,
+                });
+            }
+            const json = JSON.stringify(list, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tier-list.json';
+            a.click();
+        }
+    </script>
+
+</body>
+
+</html>
