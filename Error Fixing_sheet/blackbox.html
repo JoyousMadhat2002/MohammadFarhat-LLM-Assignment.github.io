@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tier List Maker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .tier-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tier {
+            border: 1px solid #000;
+            margin: 10px;
+            padding: 10px;
+            min-width: 200px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tier-header {
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .tier-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+            flex-grow: 1;
+            justify-content: center;
+        }
+
+        .tier-item {
+            border: 1px solid #ddd;
+            padding: 5px;
+            position: relative;
+        }
+
+        .tier-item img {
+            max-width: 110px;
+            max-height: 120px;
+        }
+
+        .remove-item {
+            position: absolute;
+            top: 0;
+            right: 0;
+            cursor: pointer;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+        }
+
+        .reset-button {
+            margin-top: 20px;
+        }
+
+        .tier-button {
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        #imagePool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #000;
+            min-height: 200px;
+        }
+
+        #imagePool img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <button onclick="resetTierList()">Reset</button>
+        <button onclick="saveTierList()">Save</button>
+    </div>
+
+    <div id="tierList" class="tier-list">
+        <!-- Default tiers -->
+        <div class="tier" id="tierS">
+            <div class="tier-header">S Tier</div>
+            <div class="tier-images" id="tierImagesS" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="tier-button">
+                <button class="tier-button" onclick="moveTierUp('tierS')">Move Up</button>
+                <button class="tier-button" onclick="moveTierDown('tierS')">Move Down</button>
+            </div>
+        </div>
+        <div class="tier" id="tierA">
+            <div class="tier-header">A Tier</div>
+            <div class="tier-images" id="tierImagesA" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <button class="tier-button" onclick="moveTierUp('tierA')">Move Up</button>
+            <button class="tier-button" onclick="moveTierDown('tierA')">Move Down</button>
+        </div>
+        <!--... other tiers... -->
+        <div class="tier" id="tierF">
+            <div class="tier-header">F Tier</div>
+            <div class="tier-images" id="tierImagesF" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <button class="tier-button" onclick="moveTierUp('tierF')">Move Up</button>
+            <button class="tier-button" onclick="moveTierDown('tierF')">Move Down</button>
+        </div>
+    </div>
+
+    <div id="imagePool" class="tier-images" ondragover="allowDrop(event)" ondrop="drop(event)">
+        <!-- Images will be added here -->
+    </div>
+
+    <input type="file" id="imageInput" multiple onchange="loadImages(event)" />
+
+    <script>
+        // Function to load images from input
+        function loadImages(event) {
+            const files = event.target.files;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.draggable = true;
+                        img.ondragstart = function (event) {
+                            event.dataTransfer.setData('text/plain', event.target.id);
+                        };
+                        img.id = 'img-' + Date.now();
+                        document.getElementById('imagePool').appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+
+        // Functionto allow droppingimages
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        // Function to handle dropping images
+        function drop(event) {
+            event.preventDefault();
+            const data = event.dataTransfer.getData('text/plain');
+            const img = document.getElementById(data);
+            if (img) {
+                img.remove();
+                const tierId = event.target.id;
+                const tierImages = document.getElementById(tierId);
+                tierImages.appendChild(img);
+                const maxWidth = 110;
+                const maxHeight = 120;
+                const width = img.naturalWidth;
+                const height = img.naturalHeight;
+                const scale = Math.min(maxWidth / width, maxHeight / height);
+                img.style.width = width * scale + 'px';
+                img.style.height = height * scale + 'px';
+            }
+        }
+
+        // Function to reset tier list
+        function resetTierList() {
+            const tiers = document.getElementsByClassName('tier');
+            for (let i = 0; i < tiers.length; i++) {
+                const tier = tiers[i];
+                const tierImages = tier.getElementsByClassName('tier-images')[0];
+                while (tierImages.firstChild) {
+                    tierImages.removeChild(tierImages.firstChild);
+                }
+            }
+            const imagePool = document.getElementById('imagePool');
+            while (imagePool.firstChild) {
+                imagePool.removeChild(imagePool.firstChild);
+            }
+            document.getElementById('imageInput').value = '';
+        }
+
+        // Function to save tier list
+        function saveTierList() {
+            const tiers = document.getElementsByClassName('tier');
+            const list = [];
+            for (let i = 0; i < tiers.length; i++) {
+                const tier = tiers[i];
+                const tierName = tier.getElementsByClassName('tier-header')[0].textContent.trim();
+                const tierImages = [];
+                const tierImagesEl = tier.getElementsByClassName('tier-images')[0];
+                for (let j = 0; j < tierImagesEl.children.length; j++) {
+                    const img = tierImagesEl.children[j];
+                    tierImages.push({
+                        src: img.src,
+                        alt: img.alt,
+                    });
+                }
+                list.push({
+                    name: tierName,
+                    images: tierImages,
+                });
+            }
+            const json = JSON.stringify(list, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tier-list.json';
+            a.click();
+        }
+
+        // Function to move a tier up
+        function moveTierUp(tierId) {
+            const tiers = document.getElementsByClassName('tier');
+            const tierIndex = Array.from(tiers).findIndex(tier => tier.id === tierId);
+            if (tierIndex > 0) {
+                const prevTier = tiers[tierIndex - 1];
+                const nextTier = tiers[tierIndex];
+                prevTier.parentNode.insertBefore(nextTier, prevTier.nextSibling);
+            }
+        }
+
+        // Function to move a tier down
+        function moveTierDown(tierId) {
+            const tiers = document.getElementsByClassName('tier');
+            const tierIndex = Array.from(tiers).findIndex(tier => tier.id === tierId);
+            if (tierIndex < tiers.length - 1) {
+                const prevTier = tiers[tierIndex];
+                const nextTier = tiers[tierIndex + 1];
+                prevTier.parentNode.insertBefore(nextTier, prevTier.nextSibling.nextSibling);
+            }
+        }
+
+        // Function to add a new tier
+        function addTier() {
+            const tiers = document.getElementsByClassName('tier');
+            const lastTier = tiers[tiers.length - 1];
+            const newTier = lastTier.cloneNode(true);
+            newTier.id = 'tier' + (tiers.length + 1);
+            newTier.getElementsByClassName('tier-header')[0].textContent = 'New Tier';
+            newTier.getElementsByClassName('tier-images')[0].innerHTML = '';
+            newTier.getElementsByClassName('tier-button')[0].onclick = function () {
+                moveTierUp(newTier.id);
+            };
+            newTier.getElementsByClassName('tier-button')[1].onclick = function () {
+                moveTierDown(newTier.id);
+            };
+            lastTier.parentNode.insertBefore(newTier, lastTier.nextSibling);
+        }
+
+        // Function to remove a tier
+        function removeTier(tierId) {
+            const tier = document.getElementById(tierId);
+            const images = tier.getElementsByClassName('tier-images')[0];
+            while (images.firstChild) {
+                images.removeChild(images.firstChild);
+            }
+            tier.parentNode.removeChild(tier);
+        }
+
+        // Function to rename a tier
+        function renameTier(tierId) {
+            const tier = document.getElementById(tierId);
+            const header = tier.getElementsByClassName('tier-header')[0];
+            const newName = prompt('Enter a new name for the tier:');
+            if (newName) {
+                header.textContent = newName;
+            }
+        }
+
+        // Function to resize images
+        function resizeImages() {
+            const maxWidth = 110;
+            const maxHeight = 120;
+            const images = document.getElementsByTagName('img');
+            for (let i = 0; i < images.length; i++) {
+                const img = images[i];
+                const width = img.naturalWidth;
+                const height = img.naturalHeight;
+                if (width > maxWidth || height > maxHeight) {
+                    const scale = Math.min(maxWidth / width, maxHeight / height);
+                    img.style.width = width * scale + 'px';
+                    img.style.height = height * scale + 'px';
+                }
+           }
+        }
+
+        // Call resizeImages function on window load
+        window.onload = resizeImages;
+
+        // Call resizeImages function on window resize
+        window.onresize = resizeImages;
+    </script>
+
+</body>
+</html>

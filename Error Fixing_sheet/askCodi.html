@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Tier List Maker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .tier {
+            display: flex;
+            align-items: stretch;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+
+        .label-box {
+            padding: 5px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .label {
+            margin: 0;
+        }
+
+        .images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            flex-grow: 1;
+        }
+
+        .image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            margin-left: 10px;
+        }
+
+        #uploadBox {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            min-height: 100px; /* Set a minimum height for better visibility */
+        }
+
+        .uploaded-image {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div id="tierList">
+        <div class="tier" id="S">
+            <div class="label-box">
+                <p class="label">S Tier</p>
+            </div>
+            <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="buttons">
+                <button onclick="moveUp('S')">&uarr;</button>
+                <button onclick="moveDown('S')">&darr;</button>
+                <button onclick="removeTier('S')">X</button>
+            </div>
+        </div>
+
+        <div class="tier" id="A">
+            <div class="label-box">
+                <p class="label">A Tier</p>
+            </div>
+            <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="buttons">
+                <button onclick="moveUp('A')">&uarr;</button>
+                <button onclick="moveDown('A')">&darr;</button>
+                <button onclick="removeTier('A')">X</button>
+            </div>
+        </div>
+
+        <div class="tier" id="B">
+            <div class="label-box">
+                <p class="label">B Tier</p>
+            </div>
+            <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="buttons">
+                <button onclick="moveUp('B')">&uarr;</button>
+                <button onclick="moveDown('B')">&darr;</button>
+                <button onclick="removeTier('B')">X</button>
+            </div>
+        </div>
+
+        <div class="tier" id="C">
+            <div class="label-box">
+                <p class="label">C Tier</p>
+            </div>
+            <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="buttons">
+                <button onclick="moveUp('C')">&uarr;</button>
+                <button onclick="moveDown('C')">&darr;</button>
+                <button onclick="removeTier('C')">X</button>
+            </div>
+        </div>
+
+        <div class="tier" id="D">
+            <div class="label-box">
+                <p class="label">D Tier</p>
+            </div>
+            <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="buttons">
+                <button onclick="moveUp('D')">&uarr;</button>
+                <button onclick="moveDown('D')">&darr;</button>
+                <button onclick="removeTier('D')">X</button>
+            </div>
+        </div>
+
+        <div class="tier" id="F">
+            <div class="label-box">
+                <p class="label">F Tier</p>
+            </div>
+            <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="buttons">
+                <button onclick="moveUp('F')">&uarr;</button>
+                <button onclick="moveDown('F')">&darr;</button>
+                <button onclick="removeTier('F')">X</button>
+            </div>
+        </div>
+    </div>
+
+    <button onclick="addNewTier()">Add Tier</button>
+
+    <div id="uploadBox">
+        <!-- Uploaded images will be listed here -->
+    </div>
+
+    <input type="file" id="fileUploader" accept="image/*" multiple>
+    <button onclick="resetTierList()">Reset</button>
+    <button onclick="saveTierList()">Save</button>
+
+    <script>
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        function drag(event) {
+            event.dataTransfer.setData("text", event.target.id);
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            var data = event.dataTransfer.getData("text");
+            var droppedImage = document.getElementById(data);
+
+            // Calculate the position of the dropped image relative to the mouse pointer
+            var mouseX = event.clientX - event.target.getBoundingClientRect().left;
+            var tierRect = event.target.getBoundingClientRect();
+
+            var images = Array.from(event.target.querySelectorAll('.image'));
+            var foundIndex = images.findIndex(img => mouseX < img.getBoundingClientRect().left + img.offsetWidth / 2);
+
+            if (foundIndex !== -1) {
+                event.target.insertBefore(droppedImage, images[foundIndex]);
+            } else {
+                event.target.appendChild(droppedImage);
+            }
+        }
+
+        function moveUp(tierId) {
+            var tier = document.getElementById(tierId);
+            var previousTier = tier.previousElementSibling;
+            if (previousTier) {
+                previousTier.before(tier);
+            }
+        }
+
+        function moveDown(tierId) {
+            var tier = document.getElementById(tierId);
+            var nextTier = tier.nextElementSibling;
+            if (nextTier) {
+                nextTier.after(tier);
+            }
+        }
+
+        function addNewTier() {
+            var newTier = document.createElement('div');
+            newTier.className = 'tier';
+            var tierId = 'Tier-' + Math.random().toString(36).substr(2, 5);
+            var tierName = prompt('Enter Tier Name:');
+            newTier.id = tierId;
+            newTier.innerHTML = `
+                <div class="label-box"><p class="label">${tierName}</p></div>
+                <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                <div class="buttons">
+                    <button onclick="moveUp('${tierId}">&uarr;</button>
+                    <button onclick="moveDown('${tierId}">&darr;</button>
+                    <button onclick="removeTier('${tierId}')">X</button>
+                </div>`;
+            document.getElementById('tierList').appendChild(newTier);
+        }
+
+        function removeTier(tierId) {
+            var tierToRemove = document.getElementById(tierId);
+            tierToRemove.remove();
+        }
+
+        function resetTierList() {
+            var images = document.querySelectorAll('.image');
+            images.forEach(function (image) {
+                var clonedImage = image.cloneNode(true);
+                document.getElementById('uploadBox').appendChild(clonedImage);
+            });
+        }
+
+        function saveTierList() {
+            html2canvas(document.getElementById('tierList')).then(function (canvas) {
+                var imgData = canvas.toDataURL('image/png');
+                var a = document.createElement('a');
+                a.href = imgData;
+                a.download = 'tierlist.png';
+                a.click();
+            });
+        }
+
+        document.getElementById('fileUploader').addEventListener('change', function (event) {
+            var files = event.target.files;
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = function (e) {
+                        var image = document.createElement('img');
+                        image.src = e.target.result;
+                        image.id = 'img-' + Date.now();
+                        image.className = 'image';
+                        image.setAttribute('draggable', true);
+                        image.setAttribute('ondragstart', 'drag(event)');
+                        document.getElementById('uploadBox').appendChild(image);
+                    };
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

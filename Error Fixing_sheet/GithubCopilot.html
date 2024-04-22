@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .tier-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tier {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid black;
+            margin: 10px;
+            min-height: 100px;
+            width: 300px;
+            position: relative;
+        }
+
+        .tier-title {
+            padding: 0 5px;
+        }
+
+        .tier-items {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .tier-item {
+            margin: 5px;
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .tier-buttons {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tier-button {
+            margin: 5px;
+        }
+
+        .reset-button,
+        .save-button {
+            margin: 10px;
+        }
+
+        .item-pool {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            /* align items to the left */
+            align-content: flex-start;
+            /* align items to the top */
+            border: 1px solid black;
+            padding: 10px;
+            margin: 10px;
+            width: 320px;
+        }
+
+        .tier-title,
+        .tier-items,
+        .tier-buttons {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="controls">
+        <button class="reset-button">Reset</button>
+        <button class="save-button">Save</button>
+    </div>
+    <div class="tier-list">
+        <!-- Tiers will be dynamically added here -->
+    </div>
+    <div class="item-pool">
+        <!-- Items will be dynamically added here -->
+    </div>
+    <input type="file" id="image-upload" multiple>
+
+    <script>
+        // JavaScript code for the tier list functionality
+        const tierList = document.querySelector('.tier-list');
+        const itemPool = document.querySelector('.item-pool');
+        const resetButton = document.querySelector('.reset-button');
+        const saveButton = document.querySelector('.save-button');
+        const imageUpload = document.querySelector('#image-upload');
+        const tiers = ['S', 'A', 'B', 'C', 'D', 'F'];
+
+        // Initialize tiers
+        tiers.forEach((tier, index) => {
+            const tierDiv = document.createElement('div');
+            tierDiv.classList.add('tier');
+            tierDiv.innerHTML = `
+                <h2 class="tier-title">${tier}</h2>
+                <div class="tier-items"></div>
+                <div class="tier-buttons">
+                    <button class="tier-button up-button">Up</button>
+                    <button class="tier-button down-button">Down</button>
+                </div>
+            `;
+            tierList.appendChild(tierDiv);
+
+            // Add event listeners for up and down buttons
+            const upButton = tierDiv.querySelector('.up-button');
+            const downButton = tierDiv.querySelector('.down-button');
+            upButton.addEventListener('click', () => {
+                const index = Array.from(tierList.children).indexOf(tierDiv);
+                if (index > 0) {
+                    tierList.insertBefore(tierDiv, tierList.children[index - 1]);
+                }
+            });
+            downButton.addEventListener('click', () => {
+                const index = Array.from(tierList.children).indexOf(tierDiv);
+                if (index < tierList.children.length - 1) {
+                    tierList.insertBefore(tierDiv, tierList.children[index + 2]);
+                }
+            });
+        });
+
+        // Add event listeners for drag and drop functionality
+        const tierItems = document.querySelectorAll('.tier-items');
+        tierItems.forEach(tier => {
+            tier.addEventListener('dragover', e => {
+                e.preventDefault();
+            });
+            tier.addEventListener('drop', e => {
+                e.preventDefault();
+                const item = document.getElementById(e.dataTransfer.getData('text/plain'));
+                tier.appendChild(item);
+            });
+        });
+
+        // Add event listener for reset button
+        resetButton.addEventListener('click', () => {
+            const items = document.querySelectorAll('.tier-item');
+            items.forEach(item => {
+                itemPool.appendChild(item);
+            });
+        });
+
+        // Add event listener for save button
+        saveButton.addEventListener('click', () => {
+            html2canvas(tierList).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'tier-list.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            }).catch(error => {
+                console.error('Error occurred while saving tier list:', error);
+            });
+        });
+
+        // Add event listener for image upload
+        let imageId = 0; // Initialize image id counter
+        imageUpload.addEventListener('change', (e) => {
+            for (const file of e.target.files) {
+                const img = document.createElement('img');
+                const reader = new FileReader();
+                reader.onloadend = function () {
+                    img.src = reader.result; // Set the image source to the Data URL
+                    img.onload = () => URL.revokeObjectURL(img.src); // free memory
+                    img.draggable = true;
+                    img.id = 'image-' + imageId++; // Assign unique id to the image
+                    img.classList.add('tier-item'); // ensure the uploaded images also have the 'tier-item' class
+                    img.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', img.id);
+                    });
+                    itemPool.appendChild(img);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+    </script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <!-- html2canvas library for saving the tier list as an image -->
+</body>
+
+</html>
