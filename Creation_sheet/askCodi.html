@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <title>Tier List Maker</title>
     <style>
@@ -10,17 +9,27 @@
 
         .tier {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
+            align-items: stretch;
             padding: 10px;
             border: 1px solid #ddd;
             margin-bottom: 10px;
         }
 
-        #tierList {
+        .label-box {
+            padding: 5px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .label {
+            margin: 0;
+        }
+
+        .images {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
+            gap: 5px;
+            flex-grow: 1;
         }
 
         .image {
@@ -28,31 +37,112 @@
             height: 100px;
             object-fit: cover;
         }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            margin-left: 10px;
+        }
+
+        #uploadBox {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            min-height: 100px; /* Set a minimum height for better visibility */
+        }
+
+        .uploaded-image {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+        }
     </style>
 </head>
-
 <body>
     <div id="tierList">
         <div class="tier" id="S">
-            <h3>S Tier</h3>
+            <div class="label-box">
+                <p class="label">S Tier</p>
+            </div>
+            <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="buttons">
+                <button onclick="moveUp('S')">&uarr;</button>
+                <button onclick="moveDown('S')">&darr;</button>
+                <button onclick="removeTier('S')">X</button>
+            </div>
         </div>
+
         <div class="tier" id="A">
-            <h3>A Tier</h3>
+            <div class="label-box">
+                <p class="label">A Tier</p>
+            </div>
+            <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="buttons">
+                <button onclick="moveUp('A')">&uarr;</button>
+                <button onclick="moveDown('A')">&darr;</button>
+                <button onclick="removeTier('A')">X</button>
+            </div>
         </div>
+
         <div class="tier" id="B">
-            <h3>B Tier</h3>
+            <div class="label-box">
+                <p class="label">B Tier</p>
+            </div>
+            <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="buttons">
+                <button onclick="moveUp('B')">&uarr;</button>
+                <button onclick="moveDown('B')">&darr;</button>
+                <button onclick="removeTier('B')">X</button>
+            </div>
         </div>
+
         <div class="tier" id="C">
-            <h3>C Tier</h3>
+            <div class="label-box">
+                <p class="label">C Tier</p>
+            </div>
+            <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="buttons">
+                <button onclick="moveUp('C')">&uarr;</button>
+                <button onclick="moveDown('C')">&darr;</button>
+                <button onclick="removeTier('C')">X</button>
+            </div>
         </div>
+
         <div class="tier" id="D">
-            <h3>D Tier</h3>
+            <div class="label-box">
+                <p class="label">D Tier</p>
+            </div>
+            <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="buttons">
+                <button onclick="moveUp('D')">&uarr;</button>
+                <button onclick="moveDown('D')">&darr;</button>
+                <button onclick="removeTier('D')">X</button>
+            </div>
         </div>
+
         <div class="tier" id="F">
-            <h3>F Tier</h3>
+            <div class="label-box">
+                <p class="label">F Tier</p>
+            </div>
+            <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div class="buttons">
+                <button onclick="moveUp('F')">&uarr;</button>
+                <button onclick="moveDown('F')">&darr;</button>
+                <button onclick="removeTier('F')">X</button>
+            </div>
         </div>
     </div>
-    <input type="file" id="fileUploader" accept="image/*">
+
+    <button onclick="addNewTier()">Add Tier</button>
+
+    <div id="uploadBox">
+        <!-- Uploaded images will be listed here -->
+    </div>
+
+    <input type="file" id="fileUploader" accept="image/*" multiple>
     <button onclick="resetTierList()">Reset</button>
     <button onclick="saveTierList()">Save</button>
 
@@ -68,13 +158,65 @@
         function drop(event) {
             event.preventDefault();
             var data = event.dataTransfer.getData("text");
-            event.target.appendChild(document.getElementById(data));
+            var droppedImage = document.getElementById(data);
+
+            // Calculate the position of the dropped image relative to the mouse pointer
+            var mouseX = event.clientX - event.target.getBoundingClientRect().left;
+            var tierRect = event.target.getBoundingClientRect();
+
+            var images = Array.from(event.target.querySelectorAll('.image'));
+            var foundIndex = images.findIndex(img => mouseX < img.getBoundingClientRect().left + img.offsetWidth / 2);
+
+            if (foundIndex !== -1) {
+                event.target.insertBefore(droppedImage, images[foundIndex]);
+            } else {
+                event.target.appendChild(droppedImage);
+            }
+        }
+
+        function moveUp(tierId) {
+            var tier = document.getElementById(tierId);
+            var previousTier = tier.previousElementSibling;
+            if (previousTier) {
+                previousTier.before(tier);
+            }
+        }
+
+        function moveDown(tierId) {
+            var tier = document.getElementById(tierId);
+            var nextTier = tier.nextElementSibling;
+            if (nextTier) {
+                nextTier.after(tier);
+            }
+        }
+
+        function addNewTier() {
+            var newTier = document.createElement('div');
+            newTier.className = 'tier';
+            var tierId = 'Tier-' + Math.random().toString(36).substr(2, 5);
+            var tierName = prompt('Enter Tier Name:');
+            newTier.id = tierId;
+            newTier.innerHTML = `
+                <div class="label-box"><p class="label">${tierName}</p></div>
+                <div class="images" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                <div class="buttons">
+                    <button onclick="moveUp('${tierId}">&uarr;</button>
+                    <button onclick="moveDown('${tierId}">&darr;</button>
+                    <button onclick="removeTier('${tierId}')">X</button>
+                </div>`;
+            document.getElementById('tierList').appendChild(newTier);
+        }
+
+        function removeTier(tierId) {
+            var tierToRemove = document.getElementById(tierId);
+            tierToRemove.remove();
         }
 
         function resetTierList() {
             var images = document.querySelectorAll('.image');
             images.forEach(function (image) {
-                image.remove();
+                var clonedImage = image.cloneNode(true);
+                document.getElementById('uploadBox').appendChild(clonedImage);
             });
         }
 
@@ -89,21 +231,25 @@
         }
 
         document.getElementById('fileUploader').addEventListener('change', function (event) {
-            var file = event.target.files[0];
-            if (file) {
-                var reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = function (e) {
-                    var image = document.createElement('img');
-                    image.src = e.target.result;
-                    image.className = 'image';
-                    image.setAttribute('draggable', true);
-                    image.setAttribute('ondragstart', 'drag(event)');
-                    document.getElementById('tierList').appendChild(image);
-                };
+            var files = event.target.files;
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = function (e) {
+                        var image = document.createElement('img');
+                        image.src = e.target.result;
+                        image.id = 'img-' + Date.now();
+                        image.className = 'image';
+                        image.setAttribute('draggable', true);
+                        image.setAttribute('ondragstart', 'drag(event)');
+                        document.getElementById('uploadBox').appendChild(image);
+                    };
+                }
             }
         });
     </script>
 </body>
-
 </html>
+

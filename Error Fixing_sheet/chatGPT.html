@@ -19,18 +19,37 @@
             margin-top: 20px;
         }
 
-        .tier-list,
+        .tier-list-container,
         .upload-area {
-            width: 80%;
-            border: 1px solid #ccc;
-            margin-top: 20px;
+            width: calc(100% - 40px);
+            border: 2px solid #ccc;
             padding: 10px;
+            margin: 20px;
+        }
+
+        .upload-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            min-height: 104px;
+            align-items: flex-start;
+            justify-content: flex-start;
+            overflow: hidden;
+        }
+
+        .tier-list {
+            width: 100%;
+            margin-top: 20px;
         }
 
         .tier {
             background: #f1f1f1;
             padding: 10px;
             margin-bottom: 5px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .tier h2 {
@@ -38,29 +57,55 @@
             margin: 5px 0;
         }
 
+        .tier-label {
+            width: 80px;
+            height: 104px;
+            background-color: #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
         .images {
+            flex-grow: 1;
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
+            min-height: 104px;
+            align-items: center;
         }
 
         .image {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             background-size: cover;
             background-position: center;
             border: 1px solid black;
+            cursor: pointer;
+            position: relative;
         }
 
-        .button {
-            margin: 10px;
-            padding: 5px 20px;
+        .delete-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: red;
+            color: white;
+            border: none;
             cursor: pointer;
         }
 
-        .input,
-        .button {
-            font-size: 16px;
+        .move-up-down-buttons {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .move-up-down-buttons button,
+        .delete-tier {
+            margin: 2px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -70,38 +115,52 @@
         <button class="button" onclick="resetList()">Reset</button>
         <button class="button" onclick="addTier()">Add Tier</button>
         <button class="button" onclick="saveTierList()">Save Tier List</button>
-        <input type="file" multiple class="input" oninput="uploadImages(event)">
+        <label for="uploadInput">Upload Images:</label>
+        <input type="file" id="uploadInput" multiple class="input" oninput="uploadImages(event)">
         <div class="upload-area" id="uploadArea" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
-            Drop Images Here
+            <!-- Images will be displayed here -->
         </div>
-        <div class="tier-list" id="tierList">
-            <div class="tier" data-tier="S">
-                <h2 contenteditable="true">S</h2>
-                <div class="images"></div>
-            </div>
-            <div class="tier" data-tier="A">
-                <h2 contenteditable="true">A</h2>
-                <div class="images"></div>
-            </div>
-            <div class="tier" data-tier="B">
-                <h2 contenteditable="true">B</h2>
-                <div class="images"></div>
-            </div>
-            <div class="tier" data-tier="C">
-                <h2 contenteditable="true">C</h2>
-                <div the="images"></div>
-            </div>
-            <div class="tier" data-tier="D">
-                <h2 contenteditable="true">D</h2>
-                <div class="images"></div>
-            </div>
-            <div class="tier" data-tier="F">
-                <h2 contenteditable="true">F</h2>
-                <div class="images"></div>
+        <div class="tier-list-container">
+            <div class="tier-list" id="tierList">
+                <!-- Default Tiers -->
+                <div class="tier" data-tier="S" ondrop="tierDrop(event)" ondragover="tierDragOver(event)">
+                    <div class="tier-label">S</div>
+                    <div class="images"></div>
+                    <div class="move-up-down-buttons">
+                        <button onclick="moveUp(this)">▲</button>
+                        <button onclick="moveDown(this)">▼</button>
+                        <button onclick="deleteTier(this)" class="delete-tier" style="visibility: hidden;">X</button>
+                    </div>
+                </div>
+                <!-- Additional tiers will follow the same structure -->
             </div>
         </div>
     </div>
     <script>
+        function initTiers() {
+            const defaultTiers = ['S', 'A', 'B', 'C', 'D', 'F'];
+            const tierList = document.getElementById('tierList');
+            defaultTiers.forEach(tier => {
+                const tierDiv = createTier(tier);
+                tierList.appendChild(tierDiv);
+            });
+        }
+
+        function createTier(tierName) {
+            const tierDiv = document.createElement('div');
+            tierDiv.classList.add('tier');
+            tierDiv.setAttribute('ondrop', 'tierDrop(event)');
+            tierDiv.setAttribute('ondragover', 'tierDragOver(event)');
+            tierDiv.innerHTML = `<div class="tier-label">${tierName}</div>
+      <div class="images"></div>
+      <div class="move-up-down-buttons">
+        <button onclick="moveUp(this)">▲</button>
+        <button onclick="moveDown(this)">▼</button>
+        <button onclick="deleteTier(this)" class="delete-tier">X</button>
+      </div>`;
+            return tierDiv;
+        }
+
         function dragOverHandler(ev) {
             ev.preventDefault();
         }
@@ -126,41 +185,98 @@
 
         function loadImage(file) {
             let reader = new FileReader();
-            reader.onload = function (e) {
+            reader.onload = function (event) {
                 let imgDiv = document.createElement('div');
                 imgDiv.classList.add('image');
-                imgDiv.style.backgroundImage = `url(${e.target.result})`;
+                imgDiv.style.backgroundImage = `url('${event.target.result}')`;
                 imgDiv.draggable = true;
+                imgDiv.id = 'img-' + Math.random().toString(36).substr(2, 9);
                 imgDiv.ondragstart = dragStart;
+                imgDiv.ondragend = dragEnd;
+                let deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'X';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.onclick = function () { this.parentElement.remove(); };
+                imgDiv.appendChild(deleteBtn);
                 document.getElementById('uploadArea').appendChild(imgDiv);
             };
             reader.readAsDataURL(file);
         }
 
-        function dragStart(event) {
-            event.dataTransfer.setData("text", event.target.style.backgroundImage.slice(5, -2));
+        function tierDragOver(ev) {
+            ev.preventDefault();
+        }
+
+        function tierDrop(ev) {
+            ev.preventDefault();
+            const tierImagesDiv = ev.currentTarget.querySelector('.images');
+            let data = ev.dataTransfer.getData("text");
+            let movedImage = document.getElementById(data);
+            if (movedImage) {
+                tierImagesDiv.appendChild(movedImage);
+                movedImage.style.cursor = 'grab';
+            }
+        }
+
+        function dragStart(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function dragEnd(ev) {
+            ev.preventDefault();
+            // Check if the image is still outside any tier, then move it back to the source.
+            if (!ev.target.parentNode || ev.target.parentNode.id === 'uploadArea') {
+                document.getElementById('uploadArea').appendChild(ev.target);
+            }
         }
 
         function resetList() {
-            const images = document.querySelectorAll('.tier .image');
-            images.forEach(img => document.getElementById('uploadArea').appendChild(img));
+            const uploadArea = document.getElementById('uploadArea');
+            document.querySelectorAll('.tier .images').forEach(imagesContainer => {
+                while (imagesContainer.firstChild) {
+                    uploadArea.appendChild(imagesContainer.firstChild);
+                }
+            });
         }
 
         function addTier() {
-            let tierName = prompt("Enter tier name:");
-            if (!tierName) return;
-            const tierList = document.getElementById('tierList');
-            const tierDiv = document.createElement('div');
-            tierDiv.classList.add('tier');
-            tierDiv.innerHTML = `<h2 contenteditable="true">${tierName}</h2><div class="images"></div>`;
-            tierList.appendChild(tierDiv);
+            const tierName = prompt("Enter tier name:");
+            if (tierName) {
+                const newTier = createTier(tierName);
+                document.getElementById('tierList').appendChild(newTier);
+            }
+        }
+
+        function moveUp(button) {
+            const tier = button.closest('.tier');
+            if (tier.previousElementSibling) {
+                tier.parentNode.insertBefore(tier, tier.previousElementSibling);
+            }
+        }
+
+        function moveDown(button) {
+            const tier = button.closest('.tier');
+            if (tier.nextElementSibling) {
+                tier.parentNode.insertBefore(tier.nextElementSibling, tier);
+            }
+        }
+
+        function deleteTier(button) {
+            button.closest('.tier').remove();
         }
 
         function saveTierList() {
-            // This function would need to be implemented to capture the tier list as an image
-            alert("Functionality to save the tier list needs to be implemented.");
+            html2canvas(document.querySelector(".tier-list-container")).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'tier-list.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
         }
+
+        initTiers();
     </script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </body>
 
 </html>

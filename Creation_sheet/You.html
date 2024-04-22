@@ -1,95 +1,158 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <style>
         .tier {
             border: 1px solid black;
-            height: 100px;
             width: 500px;
             margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
         }
-
+        .tier-label {
+            margin-left: 10px;
+        }
+        .tier-buttons {
+            display: flex;
+            flex-direction: column;
+        }
         .item {
             width: 50px;
             height: 50px;
             border: 1px solid black;
             margin: 5px;
+            object-fit: contain;
+        }
+        #items {
+            display: flex;
+            flex-wrap: wrap;
         }
     </style>
 </head>
-
 <body>
+    <button id="add-tier">Add Tier</button>
     <button id="reset">Reset</button>
     <button id="save">Save</button>
     <div id="tiers">
         <!-- Tiers will be added here -->
     </div>
+    <input type="file" id="upload" multiple>
     <div id="items">
         <!-- Items will be added here -->
     </div>
 
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>
         var tiers = ["S", "A", "B", "C", "D", "F"];
-        var items = ["item1.png", "item2.png", "item3.png", "item4.png", "item5.png"]; // Replace with your own items
+        var items = []; // Items will be added here
 
         // Initialize tiers
         var tierDiv = document.getElementById("tiers");
         for (var i = 0; i < tiers.length; i++) {
+            addTier(tiers[i]);
+        }
+
+        // Add tier functionality
+        document.getElementById("add-tier").addEventListener("click", function() {
+            var tierName = prompt("Enter tier name:");
+            if (tierName) {
+                addTier(tierName);
+            }
+        });
+
+        function addTier(name) {
             var tier = document.createElement("div");
             tier.className = "tier";
-            tier.id = tiers[i];
+            tier.id = name;
+            var label = document.createElement("span");
+            label.className = "tier-label";
+            label.textContent = name;
+            tier.appendChild(label);
+            var itemContainer = document.createElement("div");
+            itemContainer.className = "item-container";
+            tier.appendChild(itemContainer);
+            var buttons = document.createElement("div");
+            buttons.className = "tier-buttons";
+            var upButton = document.createElement("button");
+            upButton.textContent = "Up";
+            upButton.addEventListener("click", function() {
+                var prev = tier.previousElementSibling;
+                if (prev) {
+                    tierDiv.insertBefore(tier, prev);
+                }
+            });
+            buttons.appendChild(upButton);
+            var downButton = document.createElement("button");
+            downButton.textContent = "Down";
+            downButton.addEventListener("click", function() {
+                var next = tier.nextElementSibling;
+                if (next) {
+                    tierDiv.insertBefore(next, tier);
+                }
+            });
+            buttons.appendChild(downButton);
+            var deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.addEventListener("click", function() {
+                tierDiv.removeChild(tier);
+            });
+            buttons.appendChild(deleteButton);
+            tier.appendChild(buttons);
             tierDiv.appendChild(tier);
         }
 
-        // Initialize items
-        var itemDiv = document.getElementById("items");
-        for (var i = 0; i < items.length; i++) {
-            var item = document.createElement("img");
-            item.src = items[i];
-            item.className = "item";
-            item.draggable = true;
-            itemDiv.appendChild(item);
-        }
+        // Upload functionality
+        document.getElementById("upload").addEventListener("change", function(e) {
+            for (var i = 0; i < e.target.files.length; i++) {
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    var item = document.createElement("img");
+                    item.src = event.target.result;
+                    item.className = "item";
+                    item.draggable = true;
+                    document.getElementById("items").appendChild(item);
+                };
+                reader.readAsDataURL(e.target.files[i]);
+            }
+        });
 
-        // Add drag and drop functionality
+        // Drag and drop functionality
         var dragged;
-        document.addEventListener("drag", function (event) { }, false);
-        document.addEventListener("dragstart", function (event) {
+        document.addEventListener("drag", function(event) {}, false);
+        document.addEventListener("dragstart", function(event) {
             dragged = event.target;
         }, false);
-        document.addEventListener("dragover", function (event) {
+        document.addEventListener("dragover", function(event) {
             event.preventDefault();
         }, false);
-        document.addEventListener("drop", function (event) {
+        document.addEventListener("drop", function(event) {
             event.preventDefault();
             if (event.target.className == "tier") {
                 event.target.style.background = "";
                 dragged.parentNode.removeChild(dragged);
-                event.target.appendChild(dragged);
+                event.target.querySelector(".item-container").appendChild(dragged);
             }
         }, false);
 
-        // Add reset functionality
-        document.getElementById("reset").addEventListener("click", function () {
+        // Reset functionality
+        document.getElementById("reset").addEventListener("click", function() {
             var items = document.getElementsByClassName("item");
             for (var i = 0; i < items.length; i++) {
-                itemDiv.appendChild(items[i]);
+                document.getElementById("items").appendChild(items[i]);
             }
         });
 
-        // Add save functionality
-        document.getElementById("save").addEventListener("click", function () {
-            html2canvas(document.getElementById("tiers"), {
-                onrendered: function (canvas) {
-                    var a = document.createElement("a");
-                    a.href = canvas.toDataURL("image/png");
-                    a.download = "tierlist.png";
-                    a.click();
-                }
+        // Save functionality
+        document.getElementById("save").addEventListener("click", function() {
+            html2canvas(document.getElementById("tiers")).then(function(canvas) {
+                var a = document.createElement("a");
+                a.href = canvas.toDataURL("image/png");
+                a.download = "tierlist.png";
+                a.click();
             });
         });
     </script>
 </body>
-
 </html>

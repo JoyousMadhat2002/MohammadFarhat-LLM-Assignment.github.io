@@ -8,11 +8,6 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .tier-list-container {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -20,186 +15,339 @@
 
         .tier-list {
             display: flex;
-            flex-wrap: wrap;
-            width: 80%;
-            margin-bottom: 20px;
+            flex-direction: column;
+            margin-top: 20px;
+            max-width: 700px;
+            margin: 0 auto;
+            width: calc(100% - 40px);
+            /* Adjusted for margins/padding */
         }
 
-        .tier {
-            padding: 10px 20px;
-            margin: 5px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            text-align: center;
+        .tier-container {
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            display: flex;
+            min-height: 50px;
+        }
+
+        .tier-label {
+            font-weight: bold;
+            width: 60px;
+            flex-shrink: 0;
+            padding: 10px;
+            border-right: 1px solid #ccc;
             background-color: #eee;
-            cursor: pointer;
         }
 
-        .tier.active {
-            background-color: #ddd;
+        .tier-images-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            overflow-x: auto;
+            flex: 1;
+            max-height: 200px;
+            width: calc(100% - 140px);
+            /* Adjusted calculation - Change if needed*/
         }
 
-        .item {
+        .tier-images {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px;
+        }
+
+        .tier-actions {
+            display: flex;
+            justify-content: flex-end;
+            width: 80px;
+            flex-shrink: 0;
+            padding: 5px;
+            border-left: 1px solid #ccc;
+            background-color: #eee;
+        }
+
+        .images-box {
+            margin-top: 20px;
+            border: 1px dashed #ccc;
+            padding: 20px;
+        }
+
+        .image {
             width: 100px;
             height: 100px;
-            margin: 5px;
-            border: 1px solid #eee;
-            border-radius: 5px;
-            background-color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: grab;
-        }
-
-        .item img {
-            width: 100%;
-            height: 100%;
             object-fit: cover;
-        }
-
-        .item-list {
-            display: flex;
-            flex-wrap: wrap;
-            width: 80%;
-            margin-bottom: 20px;
-        }
-
-        .upload-input {
-            display: none;
-        }
-
-        .button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .button.primary {
-            background-color: #333;
-            color: #fff;
-        }
-
-        .button.secondary {
-            background-color: #eee;
-            color: #333;
+            margin: 5px;
+            cursor: move;
         }
     </style>
 </head>
 
 <body>
     <h1>Tier List Maker</h1>
-    <div class="tier-list-container">
-        <div class="button primary" id="reset-button">Reset</div>
-        <div class="tier-list">
-            <div class="tier active" data-tier="S">S</div>
-            <div class="tier" data-tier="A">A</div>
-            <div class="tier" data-tier="B">B</div>
-            <div class="tier" data-tier="C">C</div>
-            <div class="tier" data-tier="D">D</div>
-            <div class="tier" data-tier="F">F</div>
+    <button id="addTierButton">Add Tier</button>
+    <button id="resetButton">Reset</button>
+
+    <div class="tier-list">
+        <div class="tier-container">
+            <div class="tier-label" contenteditable='true'>S</div>
+            <div class="tier-images-wrapper">
+                <div class="tier-images"></div>
+            </div>
+            <div class="tier-actions">
+                <button onclick="moveTierUp(this)">Up</button>
+                <button onclick="moveTierDown(this)">Down</button>
+            </div>
         </div>
-        <div>
-            <label for="item-upload">Add Items: </label>
-            <input type="file" id="item-upload" multiple accept="image/*">
-            <button class="button secondary" id="add-item-button">Add</button>
+        <div class="tier-container">
+            <div class="tier-label" contenteditable='true'>A</div>
+            <div class="tier-images-wrapper">
+                <div class="tier-images"></div>
+            </div>
+            <div class="tier-actions">
+                <button onclick="moveTierUp(this)">Up</button>
+                <button onclick="moveTierDown(this)">Down</button>
+            </div>
         </div>
-        <div class="item-list"></div>
+        <div class="tier-container">
+            <div class="tier-label" contenteditable='true'>B</div>
+            <div class="tier-images-wrapper">
+                <div class="tier-images"></div>
+            </div>
+            <div class="tier-actions">
+                <button onclick="moveTierUp(this)">Up</button>
+                <button onclick="moveTierDown(this)">Down</button>
+            </div>
+        </div>
+        <div class="tier-container">
+            <div class="tier-label" contenteditable='true'>C</div>
+            <div class="tier-images-wrapper">
+                <div class="tier-images"></div>
+            </div>
+            <div class="tier-actions">
+                <button onclick="moveTierUp(this)">Up</button>
+                <button onclick="moveTierDown(this)">Down</button>
+            </div>
+        </div>
+        <div class="tier-container">
+            <div class="tier-label" contenteditable='true'>D</div>
+            <div class="tier-images-wrapper">
+                <div class="tier-images"></div>
+            </div>
+            <div class="tier-actions">
+                <button onclick="moveTierUp(this)">Up</button>
+                <button onclick="moveTierDown(this)">Down</button>
+            </div>
+        </div>
+        <div class="tier-container">
+            <div class="tier-label" contenteditable='true'>F</div>
+            <div class="tier-images-wrapper">
+                <div class="tier-images"></div>
+            </div>
+            <div class="tier-actions">
+                <button onclick="moveTierUp(this)">Up</button>
+                <button onclick="moveTierDown(this)">Down</button>
+            </div>
+        </div>
+    </div>
+    <button id="saveButton">Save</button>
+    <button id="loadButton">Load</button>
+
+    <div class="images-box">
+        Drop images here or <input type="file" id="imageUpload" multiple>
     </div>
 
     <script>
         const tierList = document.querySelector('.tier-list');
-        const itemList = document.querySelector('.item-list');
-        const resetButton = document.getElementById('reset-button');
-        const itemUpload = document.getElementById('item-upload');
-        const addItemButton = document.getElementById('add-item-button');
+        const imagesBox = document.querySelector('.images-box');
+        const resetButton = document.getElementById('resetButton');
+        const imageUpload = document.getElementById('imageUpload');
+        const addTierButton = document.getElementById('addTierButton');
 
-        let tiers = ['S', 'A', 'B', 'C', 'D', 'F'];
-        let items = [];
+        // Drag and Drop Functionality with Tier Isolation
+        imagesBox.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
 
-        function createTier(tierName) {
-            const tier = document.createElement('div');
-            tier.classList.add('tier');
-            tier.textContent = tierName;
-            tier.dataset.tier = tierName;
-            tier.addEventListener('click', handleTierClick);
-            return tier;
-        }
-
-        function createItem(imageUrl) {
-            const item = document.createElement('div');
-            item.classList.add('item');
-
-            const image = document.createElement('img');
-            image.src = imageUrl;
-
-            item.appendChild(image);
-
-            item.addEventListener('dragstart', handleDragStart);
-            item.addEventListener('dragover', handleDragOver);
-            item.addEventListener('drop', handleDrop);
-
-            return item;
-        }
-
-        function handleDragStart(event) {
-            event.dataTransfer.setData('text/plain', event.target.dataset.imageUrl);
-        }
-
-        function handleDragOver(event) {
-            if (event.preventDefault) {
-                event.preventDefault();
+        imagesBox.addEventListener('drop', (e) => {
+            e.preventDefault();
+            for (const file of e.dataTransfer.files) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.classList.add('image');
+                img.draggable = true;
+                img.addEventListener('dragstart', dragStart);
+                imagesBox.appendChild(img);
             }
+        });
+
+        imagesBox.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        tierList.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        // Inside the 'drop' event of the 'tierList':
+        tierList.addEventListener('drop', (e) => {
+            e.preventDefault();
+
+            const tierImagesContainer = e.target.closest('.tier-container').querySelector('.tier-images');
+
+            if (tierImagesContainer) {
+                const img = document.querySelector('.image[draggable="true"]');
+                if (img) { // Ensure the image element exists
+                    img.draggable = false;
+                    tierImagesContainer.appendChild(img);
+                }
+            }
+        });
+
+        function dragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.src);
         }
 
-        function handleDrop(event) {
-            const tierName = event.target.closest('.tier').dataset.tier;
-            const imageUrl = event.dataTransfer.getData('text/plain');
-            addItemToTier(imageUrl, tierName);
-        }
+        // Reset Functionality
+        resetButton.addEventListener('click', () => {
+            const images = document.querySelectorAll('.image');
+            images.forEach(img => imagesBox.appendChild(img));
+        });
 
-        function addItemToTier(imageUrl, tierName) {
-            const newItem = createItem(imageUrl);
-            newItem.dataset.imageUrl = imageUrl;
-            const targetTier = tierList.querySelector(`[data-tier="${tierName}"]`);
-            targetTier.appendChild(newItem);
-        }
+        // Save Functionality
+        const saveButton = document.getElementById('saveButton');
+        saveButton.addEventListener('click', saveTierList);
 
-        function handleTierClick(event) {
-            tierList.querySelectorAll('.tier').forEach(tier => tier.classList.remove('active'));
-            event.target.classList.add('active');
-        }
+        function saveTierList() {
+            const tierContainers = document.querySelectorAll('.tier-container');
+            const tierListData = { tiers: [] };
 
-        function resetTierList() {
-            itemList.innerHTML = '';
-            tiers.forEach(tierName => {
-                const tier = tierList.querySelector(`[data-tier="${tierName}"]`);
-                tier.querySelectorAll('.item').forEach(item => itemList.appendChild(item));
+            tierContainers.forEach(container => {
+                const tierName = container.querySelector('.tier-label').textContent;
+                const imageElements = container.querySelectorAll('.tier-images img');
+
+                const imageSources = [];
+                imageElements.forEach(img => imageSources.push(img.src));
+
+                tierListData.tiers.push({ name: tierName, images: imageSources });
             });
+
+            localStorage.setItem('myTierList', JSON.stringify(tierListData));
         }
 
-        function handleAddItem() {
-            itemUpload.click();
-        }
+        // Load Functionality
+        const loadButton = document.getElementById('loadButton');
+        loadButton.addEventListener('click', loadTierList);
 
-        function handleFileUpload(event) {
-            const files = event.target.files;
-            for (const file of files) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    addItemToTier(e.target.result);
-                };
-                reader.readAsDataURL(file);
+        function loadTierList() {
+            const savedData = localStorage.getItem('myTierList');
+            if (savedData) {
+                const tierData = JSON.parse(savedData);
+
+                // Clear existing tiers 
+                tierList.innerHTML = '';
+
+                tierData.tiers.forEach(tier => {
+                    addTier(tier.name); // Use your existing addTier function
+
+                    // Add Images
+                    const lastTier = tierList.lastElementChild;
+                    const tierImages = lastTier.querySelector('.tier-images');
+                    tier.images.forEach(imgSrc => {
+                        const img = document.createElement('img');
+                        img.src = imgSrc;
+                        img.classList.add('image');
+                        tierImages.appendChild(img);
+                    });
+                });
             }
         }
 
-        resetButton.addEventListener('click', resetTierList);
-        addItemButton.addEventListener('click', handleAddItem);
-        itemUpload.addEventListener('change', handleFileUpload);
+        function deleteTier(button) {
+            const tierContainer = button.closest('.tier-container');
+            tierContainer.remove();
+        }
 
-        // Initializing with default tiers
-        tiers.forEach(tierName => tierList.appendChild(createTier(tierName)));
+        // Tier Manipulation
+        function addTier(tierName = 'New Tier') {
+            const newTier = document.createElement('div');
+            newTier.classList.add('tier-container');
+
+            const tierLabel = document.createElement('div');
+            tierLabel.classList.add('tier-label');
+            tierLabel.contentEditable = 'true';
+            tierLabel.textContent = tierName;
+
+            const tierActions = document.createElement('div');
+            tierActions.classList.add('tier-actions');
+
+            const upButton = document.createElement('button');
+            upButton.textContent = 'Up';
+            upButton.addEventListener('click', () => moveTierUp(upButton));
+
+            const downButton = document.createElement('button');
+            downButton.textContent = 'Down';
+            downButton.addEventListener('click', () => moveTierDown(downButton));
+
+            tierActions.appendChild(upButton);
+            tierActions.appendChild(downButton);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.addEventListener('click', () => deleteTier(deleteButton));
+            tierActions.appendChild(deleteButton);
+
+            const tierImages = document.createElement('div');
+            tierImages.classList.add('tier-images');
+
+            const tierImagesWrapper = document.createElement('div');
+            tierImagesWrapper.classList.add('tier-images-wrapper');
+            tierImagesWrapper.appendChild(tierImages);
+
+            newTier.appendChild(tierLabel);
+            newTier.appendChild(tierImagesWrapper);
+            newTier.appendChild(tierActions);
+            tierList.appendChild(newTier);
+        }
+
+        function moveTierUp(button) {
+            const tierToMove = button.closest('.tier-container');
+            const previousTier = tierToMove.previousElementSibling;
+            if (previousTier) {
+                tierList.insertBefore(tierToMove, previousTier);
+            }
+        }
+
+        function moveTierDown(button) {
+            const tierToMove = button.closest('.tier-container');
+            const nextTier = tierToMove.nextElementSibling;
+            if (nextTier) {
+                tierList.insertBefore(nextTier, tierToMove);
+            }
+        }
+
+        // Basic Image Resizing 
+        function resizeImage(img, maxWidth, maxHeight) {
+            const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
+            img.width = img.width * ratio;
+            img.height = img.height * ratio;
+        }
+
+        // Image Upload Handling
+        imageUpload.addEventListener('change', (e) => {
+            for (const file of e.target.files) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.classList.add('image');
+                img.draggable = true;
+                img.addEventListener('dragstart', dragStart);
+
+                // Resize on loading
+                img.onload = () => resizeImage(img, 100, 100);
+
+                imagesBox.appendChild(img);
+            }
+        });
+
+        addTierButton.addEventListener('click', addTier); 
     </script>
 </body>
 
